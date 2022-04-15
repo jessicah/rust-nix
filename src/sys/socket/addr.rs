@@ -24,7 +24,8 @@ use crate::sys::socket::addr::sys_control::SysControlAddr;
           target_os = "illumos",
           target_os = "netbsd",
           target_os = "openbsd",
-          target_os = "fuchsia"))]
+          target_os = "fuchsia",
+          target_os = "haiku"))]
 pub use self::datalink::LinkAddr;
 #[cfg(any(target_os = "android", target_os = "linux"))]
 pub use self::vsock::VsockAddr;
@@ -73,6 +74,7 @@ pub enum AddressFamily {
     X25 = libc::AF_X25,
     #[cfg(any(target_os = "android", target_os = "linux"))]
     Rose = libc::AF_ROSE,
+    #[cfg(not(target_os = "haiku"))]
     Decnet = libc::AF_DECnet,
     #[cfg(any(target_os = "android", target_os = "linux"))]
     NetBeui = libc::AF_NETBEUI,
@@ -88,6 +90,7 @@ pub enum AddressFamily {
     AtmSvc = libc::AF_ATMSVC,
     #[cfg(any(target_os = "android", target_os = "linux"))]
     Rds = libc::AF_RDS,
+    #[cfg(not(target_os = "haiku"))]
     Sna = libc::AF_SNA,
     #[cfg(any(target_os = "android", target_os = "linux"))]
     Irda = libc::AF_IRDA,
@@ -114,7 +117,7 @@ pub enum AddressFamily {
     Iucv = libc::AF_IUCV,
     #[cfg(any(target_os = "android", target_os = "linux"))]
     RxRpc = libc::AF_RXRPC,
-    #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+    #[cfg(not(any(target_os = "illumos", target_os = "solaris", target_os = "haiku")))]
     Isdn = libc::AF_ISDN,
     #[cfg(any(target_os = "android", target_os = "linux"))]
     Phonet = libc::AF_PHONET,
@@ -181,7 +184,8 @@ pub enum AddressFamily {
               target_os = "ios",
               target_os = "macos",
               target_os = "netbsd",
-              target_os = "openbsd"))]
+              target_os = "openbsd",
+              target_os = "haiku"))]
     Dli = libc::AF_DLI,
     #[cfg(any(target_os = "dragonfly",
               target_os = "freebsd",
@@ -203,7 +207,8 @@ pub enum AddressFamily {
               target_os = "macos",
               target_os = "illumos",
               target_os = "netbsd",
-              target_os = "openbsd"))]
+              target_os = "openbsd",
+              target_os = "haiku"))]
     Link = libc::AF_LINK,
     #[cfg(any(target_os = "dragonfly",
               target_os = "freebsd",
@@ -227,7 +232,7 @@ pub enum AddressFamily {
               target_os = "openbsd"))]
     Natm = libc::AF_NATM,
     /// Unspecified address family, (see [`getaddrinfo(3)`](https://man7.org/linux/man-pages/man3/getaddrinfo.3.html))
-    #[cfg(any(target_os = "android", target_os = "linux"))]
+    #[cfg(any(target_os = "android", target_os = "linux", target_os = "haiku"))]
     Unspec = libc::AF_UNSPEC,
 }
 
@@ -254,7 +259,8 @@ impl AddressFamily {
                       target_os = "macos",
                       target_os = "netbsd",
                       target_os = "illumos",
-                      target_os = "openbsd"))]
+                      target_os = "openbsd",
+                      target_os = "haiku"))]
             libc::AF_LINK => Some(AddressFamily::Link),
             #[cfg(any(target_os = "android", target_os = "linux"))]
             libc::AF_VSOCK => Some(AddressFamily::Vsock),
@@ -726,7 +732,8 @@ pub enum SockAddr {
               target_os = "macos",
               target_os = "illumos",
               target_os = "netbsd",
-              target_os = "openbsd"))]
+              target_os = "openbsd",
+              target_os = "haiku"))]
     Link(LinkAddr),
     #[cfg(any(target_os = "android", target_os = "linux"))]
     Vsock(VsockAddr),
@@ -780,7 +787,8 @@ impl SockAddr {
                       target_os = "macos",
                       target_os = "netbsd",
                       target_os = "illumos",
-                      target_os = "openbsd"))]
+                      target_os = "openbsd",
+                      target_os = "haiku"))]
             SockAddr::Link(..) => AddressFamily::Link,
             #[cfg(any(target_os = "android", target_os = "linux"))]
             SockAddr::Vsock(..) => AddressFamily::Vsock,
@@ -827,7 +835,8 @@ impl SockAddr {
                           target_os = "macos",
                           target_os = "netbsd",
                           target_os = "illumos",
-                          target_os = "openbsd"))]
+                          target_os = "openbsd",
+                          target_os = "haiku"))]
                 Some(AddressFamily::Link) => {
                     let ether_addr = LinkAddr(*(addr as *const libc::sockaddr_dl));
                     if ether_addr.is_empty() {
@@ -915,7 +924,8 @@ impl SockAddr {
                       target_os = "macos",
                       target_os = "illumos",
                       target_os = "netbsd",
-                      target_os = "openbsd"))]
+                      target_os = "openbsd",
+                      target_os = "haiku"))]
             SockAddr::Link(LinkAddr(ref addr)) => (
                 // This cast is always allowed in C
                 unsafe {
@@ -954,7 +964,8 @@ impl fmt::Display for SockAddr {
                       target_os = "macos",
                       target_os = "netbsd",
                       target_os = "illumos",
-                      target_os = "openbsd"))]
+                      target_os = "openbsd",
+                      target_os = "haiku"))]
             SockAddr::Link(ref ether_addr) => ether_addr.fmt(f),
             #[cfg(any(target_os = "android", target_os = "linux"))]
             SockAddr::Vsock(ref svm) => svm.fmt(f),
@@ -1205,7 +1216,8 @@ mod datalink {
           target_os = "macos",
           target_os = "illumos",
           target_os = "netbsd",
-          target_os = "openbsd"))]
+          target_os = "openbsd",
+          target_os = "haiku"))]
 mod datalink {
     use super::{fmt, AddressFamily};
 

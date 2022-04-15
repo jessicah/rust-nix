@@ -286,9 +286,12 @@ libc_bitflags!{
 libc_bitflags!{
     /// Flags for [`mlockall`].
     pub struct MlockAllFlags: c_int {
-        /// Lock pages that are currently mapped into the address space of the process.
+        /// Lock pages that are currently mapped into the address space of the
+        /// process.
+        #[cfg(not(target_os = "haiku"))]
         MCL_CURRENT;
         /// Lock pages which will become mapped into the address space of the process in the future.
+        #[cfg(not(target_os = "haiku"))]
         MCL_FUTURE;
     }
 }

@@ -17,6 +17,7 @@ cfg_if! {
         target_os = "ios",
         target_os = "android",
         target_os = "dragonfly",
+        target_os = "haiku",
         all(target_os = "linux", not(target_env = "gnu"))
     ))]{
         use libc::{c_int, rlimit, RLIM_INFINITY};
@@ -45,6 +46,7 @@ libc_enum! {
             target_os = "ios",
             target_os = "android",
             target_os = "dragonfly",
+            target_os = "haiku",
             all(target_os = "linux", not(target_env = "gnu"))
         ), repr(i32))]
     #[non_exhaustive]
@@ -181,6 +183,8 @@ pub fn getrlimit(resource: Resource) -> Result<(Option<rlim_t>, Option<rlim_t>)>
     })
 }
 
+use std::convert::TryInto;
+
 /// Set the current processes resource limits
 ///
 /// # Parameters
@@ -218,8 +222,8 @@ pub fn setrlimit(
     hard_limit: Option<rlim_t>,
 ) -> Result<()> {
     let new_rlim = rlimit {
-        rlim_cur: soft_limit.unwrap_or(RLIM_INFINITY),
-        rlim_max: hard_limit.unwrap_or(RLIM_INFINITY),
+        rlim_cur: soft_limit.unwrap_or(RLIM_INFINITY.try_into().unwrap()),
+        rlim_max: hard_limit.unwrap_or(RLIM_INFINITY.try_into().unwrap()),
     };
     cfg_if! {
         if #[cfg(all(target_os = "linux", target_env = "gnu"))]{

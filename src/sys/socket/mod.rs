@@ -89,6 +89,7 @@ pub enum SockType {
     Raw = libc::SOCK_RAW,
     /// Provides a reliable datagram layer that does not
     /// guarantee ordering.
+    #[cfg(not(target_os = "haiku"))]
     Rdm = libc::SOCK_RDM,
 }
 
@@ -264,7 +265,7 @@ libc_bitflags!{
 }
 
 cfg_if! {
-    if #[cfg(any(target_os = "android", target_os = "linux"))] {
+    if #[cfg(any(target_os = "android", target_os = "linux", target_os = "haiku"))] {
         /// Unix credentials of the sending process.
         ///
         /// This struct is used with the `SO_PEERCRED` ancillary message
@@ -701,6 +702,7 @@ impl ControlMessageOwned {
                 let cred: libc::cmsgcred = ptr::read_unaligned(p as *const _);
                 ControlMessageOwned::ScmCreds(cred.into())
             }
+            #[cfg(not(target_os = "haiku"))]
             (libc::SOL_SOCKET, libc::SCM_TIMESTAMP) => {
                 let tv: libc::timeval = ptr::read_unaligned(p as *const _);
                 ControlMessageOwned::ScmTimestamp(TimeVal::from(tv))

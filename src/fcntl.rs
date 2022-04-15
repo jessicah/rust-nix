@@ -50,7 +50,7 @@ libc_bitflags!(
         /// Open the file in append-only mode.
         O_APPEND;
         /// Generate a signal when input or output becomes possible.
-        #[cfg(not(any(target_os = "illumos", target_os = "solaris")))]
+        #[cfg(not(any(target_os = "illumos", target_os = "solaris", target_os = "haiku")))]
         O_ASYNC;
         /// Closes the file descriptor once an `execve` call is made.
         ///
@@ -74,7 +74,8 @@ libc_bitflags!(
                   target_os = "linux",
                   target_os = "macos",
                   target_os = "netbsd",
-                  target_os = "openbsd"))]
+                  target_os = "openbsd",
+                  target_os = "haiku"))]
         O_DSYNC;
         /// Error out if a file was not created.
         O_EXCL;
@@ -110,7 +111,7 @@ libc_bitflags!(
         #[cfg(not(target_os = "redox"))]
         O_NOCTTY;
         /// Same as `O_NONBLOCK`.
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "redox", target_os = "haiku")))]
         O_NDELAY;
         /// `open()` will fail if the given path is a symbolic link.
         O_NOFOLLOW;
@@ -133,7 +134,7 @@ libc_bitflags!(
         /// This should not be combined with `O_WRONLY` or `O_RDONLY`.
         O_RDWR;
         /// Similar to `O_DSYNC` but applies to `read`s instead.
-        #[cfg(any(target_os = "linux", target_os = "netbsd", target_os = "openbsd"))]
+        #[cfg(any(target_os = "linux", target_os = "netbsd", target_os = "openbsd", target_os = "haiku"))]
         O_RSYNC;
         /// Skip search permission checks.
         #[cfg(target_os = "netbsd")]

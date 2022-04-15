@@ -30,6 +30,10 @@ cfg_if! {
         unsafe fn errno_location() -> *mut c_int {
             libc::___errno()
         }
+    } else if #[cfg(target_os = "haiku")] {
+        unsafe fn errno_location() -> *mut c_int {
+            libc::_errnop()
+        }
     }
 }
 
@@ -94,7 +98,7 @@ impl Errno {
         desc(self)
     }
 
-    pub const fn from_i32(err: i32) -> Errno {
+    pub fn from_i32(err: i32) -> Errno {
         from_i32(err)
     }
 
@@ -2717,6 +2721,185 @@ mod consts {
             libc::EALREADY => EALREADY,
             libc::EINPROGRESS => EINPROGRESS,
             libc::ESTALE => ESTALE,
+            _ => UnknownErrno,
+        }
+    }
+}
+
+#[cfg(target_os = "haiku")]
+mod consts {
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+    #[repr(i32)]
+    #[non_exhaustive]
+    pub enum Errno {
+        UnknownErrno = 0,
+        E2BIG = libc::E2BIG,
+        ECHILD =        libc::ECHILD,
+        EDEADLK =       libc::EDEADLK,
+        EFBIG = libc::EFBIG,
+        EMLINK =        libc::EMLINK,
+        ENFILE =        libc::ENFILE,
+        ENODEV =        libc::ENODEV,
+        ENOLCK =        libc::ENOLCK,
+        ENOSYS =        libc::ENOSYS,
+        ENOTTY =        libc::ENOTTY,
+        ENXIO = libc::ENXIO,
+        ESPIPE =        libc::ESPIPE,
+        ESRCH = libc::ESRCH,
+        EFPOS = libc::EFPOS,
+        ESIGPARM =      libc::ESIGPARM,
+        EDOM =  libc::EDOM,
+        ERANGE =        libc::ERANGE,
+        EPROTOTYPE =    libc::EPROTOTYPE,
+        EPROTONOSUPPORT =       libc::EPROTONOSUPPORT,
+        EPFNOSUPPORT =  libc::EPFNOSUPPORT,
+        EAFNOSUPPORT =  libc::EAFNOSUPPORT,
+        EADDRINUSE =    libc::EADDRINUSE,
+        EADDRNOTAVAIL = libc::EADDRNOTAVAIL,
+        ENETDOWN =      libc::ENETDOWN,
+        ENETUNREACH =   libc::ENETUNREACH,
+        ENETRESET =     libc::ENETRESET,
+        ECONNABORTED =  libc::ECONNABORTED,
+        ECONNRESET =    libc::ECONNRESET,
+        EISCONN =       libc::EISCONN,
+        ENOTCONN =      libc::ENOTCONN,
+        ESHUTDOWN =     libc::ESHUTDOWN,
+        ECONNREFUSED =  libc::ECONNREFUSED,
+        EHOSTUNREACH =  libc::EHOSTUNREACH,
+        ENOPROTOOPT =   libc::ENOPROTOOPT,
+        ENOBUFS =       libc::ENOBUFS,
+        EINPROGRESS =   libc::EINPROGRESS,
+        EALREADY =      libc::EALREADY,
+        EILSEQ =        libc::EILSEQ,
+        ENOMSG =        libc::ENOMSG,
+        ESTALE =        libc::ESTALE,
+        EOVERFLOW =     libc::EOVERFLOW,
+        EMSGSIZE =      libc::EMSGSIZE,
+        EOPNOTSUPP =    libc::EOPNOTSUPP,
+        ENOTSOCK =      libc::ENOTSOCK,
+        EHOSTDOWN =     libc::EHOSTDOWN,
+        EBADMSG =       libc::EBADMSG,
+        ECANCELED =     libc::ECANCELED,
+        EDESTADDRREQ =  libc::EDESTADDRREQ,
+        EDQUOT =        libc::EDQUOT,
+        EIDRM = libc::EIDRM,
+        EMULTIHOP =     libc::EMULTIHOP,
+        ENODATA =       libc::ENODATA,
+        ENOLINK =       libc::ENOLINK,
+        ENOSR = libc::ENOSR,
+        ENOSTR =        libc::ENOSTR,
+        ENOTSUP =       libc::ENOTSUP,
+        EPROTO =        libc::EPROTO,
+        ETIME = libc::ETIME,
+        ETXTBSY =       libc::ETXTBSY,
+        ENOATTR =       libc::ENOATTR,
+        ENOMEM =        libc::ENOMEM,
+        EACCES =        libc::EACCES,
+        EINTR = libc::EINTR,
+        EIO =   libc::EIO,
+        EBUSY = libc::EBUSY,
+        EFAULT =        libc::EFAULT,
+        ETIMEDOUT =     libc::ETIMEDOUT,
+        EAGAIN =        libc::EAGAIN,
+        EBADF = libc::EBADF,
+        EEXIST =        libc::EEXIST,
+        EINVAL =        libc::EINVAL,
+        ENAMETOOLONG =  libc::ENAMETOOLONG,
+        ENOENT =        libc::ENOENT,
+        EPERM = libc::EPERM,
+        ENOTDIR =       libc::ENOTDIR,
+        EISDIR =        libc::EISDIR,
+        ENOTEMPTY =     libc::ENOTEMPTY,
+        ENOSPC =        libc::ENOSPC,
+        EROFS = libc::EROFS,
+        EMFILE =        libc::EMFILE,
+        EXDEV = libc::EXDEV,
+        ELOOP = libc::ELOOP,
+        ENOEXEC =       libc::ENOEXEC,
+        EPIPE = libc::EPIPE,
+    }
+
+    #[deprecated(
+        since = "0.22.1",
+        note = "use nix::errno::Errno::ELAST instead"
+    )]
+    pub const ELAST: Errno = Errno::ELAST;
+    #[deprecated(
+        since = "0.22.1",
+        note = "use nix::errno::Errno::EWOULDBLOCK instead"
+    )]
+    pub const EWOULDBLOCK: Errno = Errno::EAGAIN;
+
+    impl Errno {
+        pub const ELAST: Errno       = Errno::EPIPE;
+        pub const EWOULDBLOCK: Errno = Errno::EAGAIN;
+    }
+
+    pub fn from_i32(e: i32) -> Errno {
+        use self::Errno::*;
+
+        match e {
+            libc::E2BIG => E2BIG,
+            libc::ECHILD => ECHILD,
+            libc::EDEADLK => EDEADLK,
+            libc::EFBIG => EFBIG,
+            libc::EMLINK => EMLINK,
+            libc::ENFILE => ENFILE,
+            libc::ENODEV => ENODEV,
+            libc::ENOLCK => ENOLCK,
+            libc::ENOSYS => ENOSYS,
+            libc::ENOTTY => ENOTTY,
+            libc::ENXIO => ENXIO,
+            libc::ESPIPE => ESPIPE,
+            libc::ESRCH => ESRCH,
+            libc::EFPOS => EFPOS,
+            libc::ESIGPARM => ESIGPARM,
+            libc::EDOM => EDOM,
+            libc::ERANGE => ERANGE,
+            libc::EPROTOTYPE => EPROTOTYPE,
+            libc::EPROTONOSUPPORT => EPROTONOSUPPORT,
+            libc::EPFNOSUPPORT => EPFNOSUPPORT,
+            libc::EAFNOSUPPORT => EAFNOSUPPORT,
+            libc::EADDRINUSE => EADDRINUSE,
+            libc::EADDRNOTAVAIL => EADDRNOTAVAIL,
+            libc::ENETDOWN => ENETDOWN,
+            libc::ENETUNREACH => ENETUNREACH,
+            libc::ENETRESET => ENETRESET,
+            libc::ECONNABORTED => ECONNABORTED,
+            libc::ECONNRESET => ECONNRESET,
+            libc::EISCONN => EISCONN,
+            libc::ENOTCONN => ENOTCONN,
+            libc::ESHUTDOWN => ESHUTDOWN,
+            libc::ECONNREFUSED => ECONNREFUSED,
+            libc::EHOSTUNREACH => EHOSTUNREACH,
+            libc::ENOPROTOOPT => ENOPROTOOPT,
+            libc::ENOBUFS => ENOBUFS,
+            libc::EINPROGRESS => EINPROGRESS,
+            libc::EALREADY => EALREADY,
+            libc::EILSEQ => EILSEQ,
+            libc::ENOMSG => ENOMSG,
+            libc::ESTALE => ESTALE,
+            libc::EOVERFLOW => EOVERFLOW,
+            libc::EMSGSIZE => EMSGSIZE,
+            libc::EOPNOTSUPP => EOPNOTSUPP,
+            libc::ENOTSOCK => ENOTSOCK,
+            libc::EHOSTDOWN => EHOSTDOWN,
+            libc::EBADMSG => EBADMSG,
+            libc::ECANCELED => ECANCELED,
+            libc::EDESTADDRREQ => EDESTADDRREQ,
+            libc::EDQUOT => EDQUOT,
+            libc::EIDRM => EIDRM,
+            libc::EMULTIHOP => EMULTIHOP,
+            libc::ENODATA => ENODATA,
+            libc::ENOLINK => ENOLINK,
+            libc::ENOSR => ENOSR,
+            libc::ENOSTR => ENOSTR,
+            libc::ENOTSUP => ENOTSUP,
+            libc::EPROTO => EPROTO,
+            libc::ETIME => ETIME,
+            libc::ETXTBSY => ETXTBSY,
+            libc::ENOATTR => ENOATTR,
+            libc::ENOMEM => ENOMEM,
             _ => UnknownErrno,
         }
     }

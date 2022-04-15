@@ -255,7 +255,8 @@ libc_enum!{
     ///
     /// B0 is special and will disable the port.
     #[cfg_attr(all(any(target_os = "ios", target_os = "macos"), target_pointer_width = "64"), repr(u64))]
-    #[cfg_attr(not(all(any(target_os = "ios", target_os = "macos"), target_pointer_width = "64")), repr(u32))]
+    #[cfg_attr(not(any(target_os = "haiku", all(any(target_os = "ios", target_os = "macos"), target_pointer_width = "64"))), repr(u32))]
+    #[cfg_attr(target_os = "haiku", repr(u8))]
     #[non_exhaustive]
     pub enum BaudRate {
         B0,
@@ -412,6 +413,7 @@ libc_enum! {
     #[repr(usize)]
     #[non_exhaustive]
     pub enum SpecialCharacterIndices {
+        #[cfg(not(target_os = "haiku"))]
         VDISCARD,
         #[cfg(any(target_os = "dragonfly",
                 target_os = "freebsd",
@@ -432,11 +434,13 @@ libc_enum! {
         VERASE2,
         VINTR,
         VKILL,
+        #[cfg(not(target_os = "haiku"))]
         VLNEXT,
         #[cfg(not(any(all(target_os = "linux", target_arch = "sparc64"),
-                target_os = "illumos", target_os = "solaris")))]
+                target_os = "illumos", target_os = "solaris", target_os = "haiku")))]
         VMIN,
         VQUIT,
+        #[cfg(not(target_os = "haiku"))]
         VREPRINT,
         VSTART,
         #[cfg(any(target_os = "dragonfly",
@@ -454,8 +458,9 @@ libc_enum! {
         #[cfg(any(target_os = "haiku", target_os = "illumos", target_os = "solaris"))]
         VSWTCH,
         #[cfg(not(any(all(target_os = "linux", target_arch = "sparc64"),
-                target_os = "illumos", target_os = "solaris")))]
+                target_os = "illumos", target_os = "solaris", target_os = "haiku")))]
         VTIME,
+        #[cfg(not(target_os = "haiku"))]
         VWERASE,
         #[cfg(target_os = "dragonfly")]
         VCHECKPT,
@@ -463,7 +468,7 @@ libc_enum! {
 }
 
 #[cfg(any(all(target_os = "linux", target_arch = "sparc64"),
-        target_os = "illumos", target_os = "solaris"))]
+        target_os = "illumos", target_os = "solaris", target_os = "haiku"))]
 impl SpecialCharacterIndices {
     pub const VMIN: SpecialCharacterIndices = SpecialCharacterIndices::VEOF;
     pub const VTIME: SpecialCharacterIndices = SpecialCharacterIndices::VEOL;
@@ -494,7 +499,7 @@ libc_bitflags! {
         IXOFF;
         #[cfg(not(target_os = "redox"))]
         IXANY;
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "redox", target_os = "haiku")))]
         IMAXBEL;
         #[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
         IUTF8;
@@ -775,7 +780,7 @@ libc_bitflags! {
                   target_os = "openbsd"))]
         ALTWERASE;
         IEXTEN;
-        #[cfg(not(target_os = "redox"))]
+        #[cfg(not(any(target_os = "redox", target_os = "haiku")))]
         EXTPROC;
         TOSTOP;
         #[cfg(not(target_os = "redox"))]

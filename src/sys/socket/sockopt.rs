@@ -16,7 +16,7 @@ use std::os::unix::ffi::OsStrExt;
 
 // Constants
 // TCP_CA_NAME_MAX isn't defined in user space include files
-#[cfg(any(target_os = "freebsd", target_os = "linux"))] 
+#[cfg(any(target_os = "freebsd", target_os = "linux"))]
 const TCP_CA_NAME_MAX: usize = 16;
 
 /// Helper for implementing `SetSockOpt` for a given socket option. See
@@ -341,7 +341,7 @@ sockopt_impl!(
     /// Get the credentials of the peer process of a connected unix domain
     /// socket.
     LocalPeerCred, GetOnly, 0, libc::LOCAL_PEERCRED, super::XuCred);
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(any(target_os = "android", target_os = "linux", target_os = "haiku"))]
 sockopt_impl!(
     /// Return the credentials of the foreign process connected to this socket.
     PeerCredentials, GetOnly, libc::SOL_SOCKET, libc::SO_PEERCRED, super::UnixCredentials);
@@ -371,7 +371,7 @@ cfg_if! {
             TcpMaxSeg, GetOnly, libc::IPPROTO_TCP, libc::TCP_MAXSEG, u32);
     }
 }
-#[cfg(not(target_os = "openbsd"))]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku")))]
 sockopt_impl!(
     /// The maximum number of keepalive probes TCP should send before
     /// dropping the connection.
@@ -383,7 +383,7 @@ sockopt_impl!(
     #[allow(missing_docs)]
     // Not documented by Linux!
     TcpRepair, Both, libc::IPPROTO_TCP, libc::TCP_REPAIR, u32);
-#[cfg(not(target_os = "openbsd"))]
+#[cfg(not(any(target_os = "openbsd", target_os = "haiku")))]
 sockopt_impl!(
     /// The time (in seconds) between individual keepalive probes.
     TcpKeepInterval, Both, libc::IPPROTO_TCP, libc::TCP_KEEPINTVL, u32);
@@ -432,7 +432,8 @@ sockopt_impl!(
     #[allow(missing_docs)]
     // Not documented by Linux!
     Ip6tOriginalDst, GetOnly, libc::SOL_IPV6, libc::IP6T_SO_ORIGINAL_DST, libc::sockaddr_in6);
-sockopt_impl!( 
+#[cfg(not(target_os = "haiku"))]
+sockopt_impl!(
     /// Enable or disable the receiving of the `SO_TIMESTAMP` control message.
     ReceiveTimestamp, Both, libc::SOL_SOCKET, libc::SO_TIMESTAMP, bool);
 #[cfg(all(target_os = "linux"))]
@@ -463,7 +464,7 @@ sockopt_impl!(
     /// Enable or disable the receiving of the `SCM_CREDENTIALS` control
     /// message.
     PassCred, Both, libc::SOL_SOCKET, libc::SO_PASSCRED, bool);
-#[cfg(any(target_os = "freebsd", target_os = "linux"))] 
+#[cfg(any(target_os = "freebsd", target_os = "linux"))]
 sockopt_impl!(
     /// This option allows the caller to set the TCP congestion control
     /// algorithm to be used,  on a per-socket basis.
