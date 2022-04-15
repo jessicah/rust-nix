@@ -6,7 +6,7 @@ use nix::sys::wait::*;
 use libc::_exit;
 
 #[test]
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "haiku")))]
 fn test_wait_signal() {
     let _m = crate::FORK_MTX.lock();
 
@@ -22,6 +22,25 @@ fn test_wait_signal() {
       },
     }
 }
+
+#[test]
+#[cfg(target_os = "haiku")]
+fn test_wait_signal() {
+    let _m = crate::FORK_MTX.lock();
+
+    // Safe: The child only calls `pause` and/or `_exit`, which are async-signal-safe.
+    match unsafe{fork()}.expect("Error: Fork Failed") {
+      Child => {
+          pause();
+          unsafe { _exit(123) }
+      },
+      Parent { child } => {
+          kill(child, Some(SIGKILL)).expect("Error: Kill Failed");
+          assert_eq!(waitpid(child, None), Ok(WaitStatus::Signaled(child, SIGKILLTHR, false)));
+      },
+    }
+}
+
 
 #[test]
 fn test_wait_exit() {

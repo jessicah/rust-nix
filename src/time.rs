@@ -5,6 +5,7 @@ use crate::sys::time::TimeSpec;
     target_os = "linux",
     target_os = "android",
     target_os = "emscripten",
+    target_os = "haiku"
 ))]
 use crate::unistd::Pid;
 use crate::{Errno, Result};
@@ -31,6 +32,7 @@ impl ClockId {
         target_os = "linux",
         target_os = "android",
         target_os = "emscripten",
+        target_os = "haiku"
     ))]
     pub fn pid_cpu_clock_id(pid: Pid) -> Result<Self> {
         clock_getcpuclockid(pid)
@@ -109,6 +111,7 @@ impl ClockId {
         target_os = "ios",
         target_os = "freebsd",
         target_os = "dragonfly",
+        target_os = "haiku",
         all(
             not(target_env = "newlib"),
             any(target_os = "linux", target_os = "android", target_os = "emscripten")
@@ -247,6 +250,7 @@ pub fn clock_settime(clock_id: ClockId, timespec: TimeSpec) -> Result<()> {
     target_os = "linux",
     target_os = "android",
     target_os = "emscripten",
+    target_os = "haiku"
 ))]
 pub fn clock_getcpuclockid(pid: Pid) -> Result<ClockId> {
     let mut clk_id: MaybeUninit<libc::clockid_t> = MaybeUninit::uninit();

@@ -17,6 +17,7 @@ cfg_if! {
         target_os = "ios",
         target_os = "android",
         target_os = "dragonfly",
+        target_os = "haiku",
         all(target_os = "linux", not(target_env = "gnu"))
     ))]{
         use libc::{c_int, rlimit, RLIM_INFINITY};
@@ -45,6 +46,7 @@ libc_enum! {
             target_os = "ios",
             target_os = "android",
             target_os = "dragonfly",
+            target_os = "haiku",
             all(target_os = "linux", not(target_env = "gnu"))
         ), repr(i32))]
     #[non_exhaustive]

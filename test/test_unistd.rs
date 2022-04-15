@@ -559,7 +559,7 @@ cfg_if!{
                 skip_if_jailed!("test_acct");
             }
         }
-    } else if #[cfg(not(any(target_os = "redox", target_os = "fuchsia")))] {
+    } else if #[cfg(not(any(target_os = "redox", target_os = "fuchsia", target_os = "haiku")))] {
         macro_rules! require_acct{
             () => {
                 skip_if_not_root!("test_acct");
@@ -569,7 +569,7 @@ cfg_if!{
 }
 
 #[test]
-#[cfg(not(any(target_os = "redox", target_os = "fuchsia")))]
+#[cfg(not(any(target_os = "redox", target_os = "fuchsia", target_os = "haiku")))]
 fn test_acct() {
     use tempfile::NamedTempFile;
     use std::process::Command;
@@ -810,7 +810,7 @@ fn test_symlinkat() {
 }
 
 #[test]
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "haiku")))]
 fn test_linkat_file() {
     let tempdir = tempdir().unwrap();
     let oldfilename = "foo.txt";
@@ -831,7 +831,7 @@ fn test_linkat_file() {
 }
 
 #[test]
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "haiku")))]
 fn test_linkat_olddirfd_none() {
     let _dr = crate::DirRestore::new();
 
@@ -856,7 +856,7 @@ fn test_linkat_olddirfd_none() {
 }
 
 #[test]
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "haiku")))]
 fn test_linkat_newdirfd_none() {
     let _dr = crate::DirRestore::new();
 
@@ -881,7 +881,7 @@ fn test_linkat_newdirfd_none() {
 }
 
 #[test]
-#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox")))]
+#[cfg(not(any(target_os = "ios", target_os = "macos", target_os = "redox", target_os = "haiku")))]
 fn test_linkat_no_follow_symlink() {
     let _m = crate::CWD_LOCK.read();
 
@@ -918,7 +918,7 @@ fn test_linkat_no_follow_symlink() {
 }
 
 #[test]
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "haiku")))]
 fn test_linkat_follow_symlink() {
     let _m = crate::CWD_LOCK.read();
 
@@ -1025,7 +1025,7 @@ fn test_access_file_exists() {
     assert!(access(&path, AccessFlags::R_OK | AccessFlags::W_OK).is_ok());
 }
 
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "haiku")))]
 #[test]
 fn test_user_into_passwd() {
     // get the UID of the "nobody" user
@@ -1033,6 +1033,16 @@ fn test_user_into_passwd() {
     let pwd: libc::passwd = nobody.into();
     let _: User = (&pwd).into();
 }
+
+#[cfg(target_os = "haiku")]
+#[test]
+fn test_user_into_passwd() {
+    // get the UID of the "nobody" user
+    let nobody = User::from_name("user").unwrap().unwrap();
+    let pwd: libc::passwd = nobody.into();
+    let _: User = (&pwd).into();
+}
+
 
 /// Tests setting the filesystem UID with `setfsuid`.
 #[cfg(any(target_os = "linux", target_os = "android"))]

@@ -86,6 +86,7 @@ libc_enum!{
         /// Window size changes
         SIGWINCH,
         /// Input/output possible signal
+        #[cfg(not(target_os = "haiku"))]
         SIGIO,
         #[cfg(any(target_os = "android", target_os = "emscripten",
                   target_os = "fuchsia", target_os = "linux"))]
@@ -95,14 +96,20 @@ libc_enum!{
         SIGSYS,
         #[cfg(not(any(target_os = "android", target_os = "emscripten",
                       target_os = "fuchsia", target_os = "linux",
-                      target_os = "redox")))]
+                      target_os = "redox", target_os = "haiku")))]
         /// Emulator trap
         SIGEMT,
         #[cfg(not(any(target_os = "android", target_os = "emscripten",
                       target_os = "fuchsia", target_os = "linux",
-                      target_os = "redox")))]
+                      target_os = "redox", target_os = "haiku")))]
         /// Information request
         SIGINFO,
+        #[cfg(target_os = "haiku")]
+        /// Be specific: kill just the thread, not team
+        SIGKILLTHR,
+        #[cfg(target_os = "haiku")]
+        /// Pollable event
+        SIGPOLL
     }
     impl TryFrom<i32>
 }
@@ -143,6 +150,7 @@ impl FromStr for Signal {
             "SIGVTALRM" => Signal::SIGVTALRM,
             "SIGPROF" => Signal::SIGPROF,
             "SIGWINCH" => Signal::SIGWINCH,
+            #[cfg(not(target_os = "haiku"))]
             "SIGIO" => Signal::SIGIO,
             #[cfg(any(target_os = "android", target_os = "emscripten",
                       target_os = "fuchsia", target_os = "linux"))]
@@ -150,12 +158,16 @@ impl FromStr for Signal {
             "SIGSYS" => Signal::SIGSYS,
             #[cfg(not(any(target_os = "android", target_os = "emscripten",
                           target_os = "fuchsia", target_os = "linux",
-                          target_os = "redox")))]
+                          target_os = "redox", target_os = "haiku")))]
             "SIGEMT" => Signal::SIGEMT,
             #[cfg(not(any(target_os = "android", target_os = "emscripten",
                           target_os = "fuchsia", target_os = "linux",
-                          target_os = "redox")))]
+                          target_os = "redox",target_os = "haiku")))]
             "SIGINFO" => Signal::SIGINFO,
+            #[cfg(target_os = "haiku")]
+            "SIGKILLTHR" => Signal::SIGKILLTHR,
+            #[cfg(target_os = "haiku")]
+            "SIGPOLL" => Signal::SIGPOLL,
             _ => return Err(Errno::EINVAL),
         })
     }
@@ -200,6 +212,7 @@ impl Signal {
             Signal::SIGVTALRM => "SIGVTALRM",
             Signal::SIGPROF => "SIGPROF",
             Signal::SIGWINCH => "SIGWINCH",
+            #[cfg(not(target_os = "haiku"))]
             Signal::SIGIO => "SIGIO",
             #[cfg(any(target_os = "android", target_os = "emscripten",
                       target_os = "fuchsia", target_os = "linux"))]
@@ -207,12 +220,16 @@ impl Signal {
             Signal::SIGSYS => "SIGSYS",
             #[cfg(not(any(target_os = "android", target_os = "emscripten",
                           target_os = "fuchsia", target_os = "linux",
-                          target_os = "redox")))]
+                          target_os = "redox", target_os = "haiku")))]
             Signal::SIGEMT => "SIGEMT",
             #[cfg(not(any(target_os = "android", target_os = "emscripten",
                           target_os = "fuchsia", target_os = "linux",
-                          target_os = "redox")))]
+                          target_os = "redox", target_os = "haiku")))]
             Signal::SIGINFO => "SIGINFO",
+            #[cfg(target_os = "haiku")]
+            Signal::SIGKILLTHR => "SIGKILLTHR",
+            #[cfg(target_os = "haiku")]
+            Signal::SIGPOLL => "SIGPOLL"
         }
     }
 }
@@ -335,7 +352,7 @@ const SIGNALS: [Signal; 30] = [
     SIGSYS];
 #[cfg(not(any(target_os = "linux", target_os = "android",
               target_os = "fuchsia", target_os = "emscripten",
-              target_os = "redox")))]
+              target_os = "redox", target_os = "haiku")))]
 const SIGNALS: [Signal; 31] = [
     SIGHUP,
     SIGINT,
@@ -369,6 +386,39 @@ const SIGNALS: [Signal; 31] = [
     SIGEMT,
     SIGINFO];
 
+#[cfg(target_os = "haiku")]
+const SIGNALS: [Signal; 30] = [
+    SIGHUP,
+    SIGINT,
+    SIGQUIT,
+    SIGILL,
+    SIGCHLD,
+    SIGABRT,
+    SIGPIPE,
+    SIGFPE,
+    SIGKILL,
+    SIGSTOP,
+    SIGSEGV,
+    SIGCONT,
+    SIGTSTP,
+    SIGALRM,
+    SIGTERM,
+    SIGTTIN,
+    SIGTTOU,
+    SIGUSR1,
+    SIGUSR2,
+    SIGWINCH,
+    SIGKILLTHR,
+    SIGTRAP,
+    SIGPOLL,
+    SIGPROF,
+    SIGSYS,
+    SIGURG,
+    SIGVTALRM,
+    SIGXCPU,
+    SIGXFSZ,
+    SIGBUS];
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 /// Iterate through all signals defined by this operating system
 pub struct SignalIterator {
@@ -399,6 +449,7 @@ impl Signal {
 /// Alias for [`SIGABRT`]
 pub const SIGIOT : Signal = SIGABRT;
 /// Alias for [`SIGIO`]
+#[cfg(not(target_os = "haiku"))]
 pub const SIGPOLL : Signal = SIGIO;
 /// Alias for [`SIGSYS`]
 pub const SIGUNUSED : Signal = SIGSYS;

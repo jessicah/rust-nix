@@ -101,6 +101,7 @@ mod os {
         target_os = "netbsd",       // Since 6.0
         target_os = "openbsd",      // Since 5.7
         target_os = "redox",        // Since 1-july-2020
+        target_os = "haiku"
 ))]
 mod os {
     /// Check if the OS supports atomic close-on-exec for sockets

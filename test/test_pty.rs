@@ -185,6 +185,7 @@ fn test_write_ptty_pair() {
 }
 
 #[test]
+#[cfg(not(target_os = "haiku"))]
 fn test_openpty() {
     // openpty uses ptname(3) internally
     let _m = crate::PTSNAME_MTX.lock();
@@ -220,6 +221,7 @@ fn test_openpty() {
 }
 
 #[test]
+#[cfg(not(target_os = "haiku"))]
 fn test_openpty_with_termios() {
     // openpty uses ptname(3) internally
     let _m = crate::PTSNAME_MTX.lock();
@@ -268,6 +270,7 @@ fn test_openpty_with_termios() {
 }
 
 #[test]
+#[cfg(not(target_os = "haiku"))]
 fn test_forkpty() {
     use nix::unistd::ForkResult::*;
     use nix::sys::signal::*;

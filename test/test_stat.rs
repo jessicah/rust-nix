@@ -193,6 +193,7 @@ fn test_fchmodat() {
 /// (like macOS's HFS+) do not have higher granularity.
 #[cfg(not(target_os = "redox"))]
 fn assert_times_eq(exp_atime_sec: u64, exp_mtime_sec: u64, attr: &fs::Metadata) {
+	#[cfg(not(target_os = "haiku"))]
     assert_eq!(
         Duration::new(exp_atime_sec, 0),
         attr.accessed().unwrap().duration_since(UNIX_EPOCH).unwrap());
@@ -311,7 +312,8 @@ fn test_mkdirat_fail() {
 #[cfg(not(any(target_os = "freebsd",
               target_os = "ios",
               target_os = "macos",
-              target_os = "redox")))]
+              target_os = "redox",
+              target_os = "haiku")))]
 fn test_mknod() {
     use stat::{lstat, mknod, SFlag};
 
@@ -329,7 +331,8 @@ fn test_mknod() {
               target_os = "illumos",
               target_os = "ios",
               target_os = "macos",
-              target_os = "redox")))]
+              target_os = "redox",
+              target_os = "haiku")))]
 fn test_mknodat() {
     use fcntl::{AtFlags, OFlag};
     use nix::dir::Dir;
